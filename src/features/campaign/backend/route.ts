@@ -5,10 +5,10 @@ import { CampaignService } from "./service";
 import { createCampaignSchema, updateCampaignStatusSchema } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const campaign = new Hono<AppEnv>();
+const campaignRoute = new Hono<AppEnv>();
 
 // 모집 중인 캠페인 목록
-campaign.get("/", async (c) => {
+campaignRoute.get("/", async (c) => {
   try {
     const service = new CampaignService(c.get("supabase"));
     const data = await service.getRecruitingCampaigns();
@@ -20,7 +20,7 @@ campaign.get("/", async (c) => {
 });
 
 // 캠페인 생성
-campaign.post("/", zValidator("json", createCampaignSchema), async (c) => {
+campaignRoute.post("/", zValidator("json", createCampaignSchema), async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -39,7 +39,7 @@ campaign.post("/", zValidator("json", createCampaignSchema), async (c) => {
 });
 
 // 광고주의 캠페인 목록
-campaign.get("/my", async (c) => {
+campaignRoute.get("/my", async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -56,7 +56,7 @@ campaign.get("/my", async (c) => {
 });
 
 // 캠페인 상세 조회
-campaign.get("/:id", async (c) => {
+campaignRoute.get("/:id", async (c) => {
   try {
     const campaignId = c.req.param("id");
     const service = new CampaignService(c.get("supabase"));
@@ -69,7 +69,7 @@ campaign.get("/:id", async (c) => {
 });
 
 // 캠페인 상태 변경
-campaign.patch(
+campaignRoute.patch(
   "/:id/status",
   zValidator("json", updateCampaignStatusSchema),
   async (c) => {
@@ -92,4 +92,4 @@ campaign.patch(
   }
 );
 
-export default campaign;
+export default campaignRoute;

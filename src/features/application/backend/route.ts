@@ -5,10 +5,10 @@ import { ApplicationService } from "./service";
 import { createApplicationSchema, bulkUpdateApplicationsSchema } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const application = new Hono<AppEnv>();
+const applicationRoute = new Hono<AppEnv>();
 
 // 지원하기
-application.post(
+applicationRoute.post(
   "/",
   zValidator("json", createApplicationSchema),
   async (c) => {
@@ -31,7 +31,7 @@ application.post(
 );
 
 // 내 지원 목록
-application.get("/my", async (c) => {
+applicationRoute.get("/my", async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -49,7 +49,7 @@ application.get("/my", async (c) => {
 });
 
 // 캠페인 지원자 목록 (광고주용)
-application.get("/campaign/:campaignId", async (c) => {
+applicationRoute.get("/campaign/:campaignId", async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -67,7 +67,7 @@ application.get("/campaign/:campaignId", async (c) => {
 });
 
 // 지원 선정/반려 (일괄)
-application.patch(
+applicationRoute.patch(
   "/campaign/:campaignId/bulk",
   zValidator("json", bulkUpdateApplicationsSchema),
   async (c) => {
@@ -90,4 +90,4 @@ application.patch(
   }
 );
 
-export default application;
+export default applicationRoute;
