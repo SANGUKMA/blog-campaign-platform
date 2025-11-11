@@ -1,4 +1,4 @@
-import type { Context } from 'hono';
+import type { Context, Env } from 'hono';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type AppLogger = Pick<Console, 'info' | 'error' | 'warn' | 'debug'>;
@@ -17,8 +17,9 @@ export type AppVariables = {
   userId?: string;
 };
 
-export type AppEnv = {
+export type AppEnv = Env & {
   Variables: AppVariables;
+  Bindings: Record<string, never>;
 };
 
 export type AppContext = Context<AppEnv>;
