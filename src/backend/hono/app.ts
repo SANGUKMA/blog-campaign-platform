@@ -31,11 +31,8 @@ export const createHonoApp = () => {
   registerExampleRoutes(app);
   
   // API 라우트 등록 (Next.js가 /api/*로 전달하므로 /api prefix 포함)
-  // @ts-ignore - Hono type inference issue with nested routes
   app.route('/api/profile', profileRoute);
-  // @ts-ignore - Hono type inference issue with nested routes
   app.route('/api/campaigns', campaignRoute);
-  // @ts-ignore - Hono type inference issue with nested routes
   app.route('/api/applications', applicationRoute);
 
   singletonApp = app;
