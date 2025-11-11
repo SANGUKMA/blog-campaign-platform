@@ -50,7 +50,7 @@ export const respond = <TData, TCode extends string, TDetails = unknown>(
   result: HandlerResult<TData, TCode, TDetails>,
 ) => {
   if (result.ok) {
-    return c.json(result.data, result.status);
+    return c.json({ data: result.data }, result.status);
   }
 
   const errorResult = result as ErrorResult<TCode, TDetails>;
@@ -58,6 +58,7 @@ export const respond = <TData, TCode extends string, TDetails = unknown>(
   return c.json(
     {
       error: errorResult.error,
+      message: errorResult.error.message,
     },
     errorResult.status,
   );

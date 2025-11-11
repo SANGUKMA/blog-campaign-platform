@@ -15,17 +15,15 @@ export default function LoginPage({ params }: LoginPageProps) {
   void params;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refresh, isAuthenticated } = useCurrentUser();
+  const { refresh, isAuthenticated, isLoading } = useCurrentUser();
   const [formState, setFormState] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // 디버깅: 인증 상태 로그
   useEffect(() => {
-    if (isAuthenticated) {
-      const redirectedFrom = searchParams.get("redirectedFrom") ?? "/";
-      router.replace(redirectedFrom);
-    }
-  }, [isAuthenticated, router, searchParams]);
+    console.log("Login page - isAuthenticated:", isAuthenticated, "isLoading:", isLoading);
+  }, [isAuthenticated, isLoading]);
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,19 +46,34 @@ export default function LoginPage({ params }: LoginPageProps) {
           password: formState.password,
         });
 
-        const nextAction = result.error
-          ? result.error.message ?? "로그인에 실패했습니다."
-          : ("success" as const);
-
-        if (nextAction === "success") {
-          await refresh();
-          const redirectedFrom = searchParams.get("redirectedFrom") ?? "/";
-          router.replace(redirectedFrom);
-        } else {
-          setErrorMessage(nextAction);
+        if (result.error) {
+          // Supabase 연결 에러 확인
+          if (result.error.message.includes("fetch") || result.error.message.includes("Failed to fetch")) {
+            setErrorMessage(
+              "Supabase 서버에 연결할 수 없습니다. 환경 설정을 확인하세요. (Supabase가 실행 중인지 확인)"
+            );
+          } else {
+            setErrorMessage(result.error.message ?? "로그인에 실패했습니다.");
+          }
+          setIsSubmitting(false);
+          return;
         }
+
+        // 성공 시 처리
+        await refresh();
+        
+        // 간단히 홈으로 이동 (useProfile hook이 자동으로 처리)
+        const redirectedFrom = searchParams.get("redirectedFrom") ?? "/";
+        router.replace(redirectedFrom);
       } catch (error) {
-        setErrorMessage("로그인 처리 중 오류가 발생했습니다.");
+        console.error("Login error:", error);
+        if (error instanceof Error && error.message.includes("fetch")) {
+          setErrorMessage(
+            "Supabase 서버에 연결할 수 없습니다. 환경 설정을 확인하세요."
+          );
+        } else {
+          setErrorMessage("로그인 처리 중 오류가 발생했습니다.");
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -68,9 +81,7 @@ export default function LoginPage({ params }: LoginPageProps) {
     [formState.email, formState.password, refresh, router, searchParams]
   );
 
-  if (isAuthenticated) {
-    return null;
-  }
+  // 리다이렉트 로직 완전 제거 - 로그인 페이지는 항상 표시
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center justify-center gap-10 px-6 py-16">

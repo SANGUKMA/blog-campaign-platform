@@ -21,18 +21,16 @@ export default function SignupPage({ params }: SignupPageProps) {
   void params;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, refresh } = useCurrentUser();
+  const { isAuthenticated, refresh, isLoading } = useCurrentUser();
   const [formState, setFormState] = useState(defaultFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
+  // 디버깅: 인증 상태 로그
   useEffect(() => {
-    if (isAuthenticated) {
-      const redirectedFrom = searchParams.get("redirectedFrom") ?? "/";
-      router.replace(redirectedFrom);
-    }
-  }, [isAuthenticated, router, searchParams]);
+    console.log("Signup page - isAuthenticated:", isAuthenticated, "isLoading:", isLoading);
+  }, [isAuthenticated, isLoading]);
 
   const isSubmitDisabled = useMemo(
     () =>
@@ -72,17 +70,23 @@ export default function SignupPage({ params }: SignupPageProps) {
         });
 
         if (result.error) {
-          setErrorMessage(result.error.message ?? "회원가입에 실패했습니다.");
+          // Supabase 연결 에러 확인
+          if (result.error.message.includes("fetch") || result.error.message.includes("Failed to fetch")) {
+            setErrorMessage(
+              "Supabase 서버에 연결할 수 없습니다. 환경 설정을 확인하세요. (Supabase가 실행 중인지 확인)"
+            );
+          } else {
+            setErrorMessage(result.error.message ?? "회원가입에 실패했습니다.");
+          }
           setIsSubmitting(false);
           return;
         }
 
         await refresh();
 
-        const redirectedFrom = searchParams.get("redirectedFrom") ?? "/";
-
         if (result.data.session) {
-          router.replace(redirectedFrom);
+          // 회원가입 직후 온보딩 페이지로 이동
+          router.replace("/onboarding");
           return;
         }
 
@@ -92,17 +96,22 @@ export default function SignupPage({ params }: SignupPageProps) {
         router.prefetch("/login");
         setFormState(defaultFormState);
       } catch (error) {
-        setErrorMessage("회원가입 처리 중 문제가 발생했습니다.");
+        console.error("Signup error:", error);
+        if (error instanceof Error && error.message.includes("fetch")) {
+          setErrorMessage(
+            "Supabase 서버에 연결할 수 없습니다. 환경 설정을 확인하세요."
+          );
+        } else {
+          setErrorMessage("회원가입 처리 중 문제가 발생했습니다.");
+        }
       } finally {
         setIsSubmitting(false);
       }
     },
-    [formState.confirmPassword, formState.email, formState.password, refresh, router, searchParams]
+    [formState.confirmPassword, formState.email, formState.password, refresh, router]
   );
 
-  if (isAuthenticated) {
-    return null;
-  }
+  // 리다이렉트 로직 완전 제거 - 회원가입 페이지는 항상 표시
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center justify-center gap-10 px-6 py-16">
