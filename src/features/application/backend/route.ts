@@ -1,14 +1,13 @@
-import { Hono } from "hono";
+import type { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import type { AppEnv } from "@/backend/hono/context";
 import { ApplicationService } from "./service";
 import { createApplicationSchema, bulkUpdateApplicationsSchema } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const applicationRoute: Hono<AppEnv> = new Hono<AppEnv>();
-
-// 지원하기
-applicationRoute.post(
+export const registerApplicationRoutes = (app: Hono<AppEnv>) => {
+  // 지원하기
+  app.post(
   "/",
   zValidator("json", createApplicationSchema),
   async (c) => {
@@ -31,7 +30,7 @@ applicationRoute.post(
 );
 
 // 내 지원 목록
-applicationRoute.get("/my", async (c) => {
+app.get("/my", async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -49,7 +48,7 @@ applicationRoute.get("/my", async (c) => {
 });
 
 // 캠페인 지원자 목록 (광고주용)
-applicationRoute.get("/campaign/:campaignId", async (c) => {
+app.get("/campaign/:campaignId", async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -67,7 +66,7 @@ applicationRoute.get("/campaign/:campaignId", async (c) => {
 });
 
 // 지원 선정/반려 (일괄)
-applicationRoute.patch(
+app.patch(
   "/campaign/:campaignId/bulk",
   zValidator("json", bulkUpdateApplicationsSchema),
   async (c) => {
@@ -89,5 +88,4 @@ applicationRoute.patch(
     }
   }
 );
-
-export default applicationRoute;
+};

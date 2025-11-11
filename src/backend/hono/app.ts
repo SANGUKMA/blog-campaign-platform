@@ -4,9 +4,9 @@ import { withAppContext } from '@/backend/middleware/context';
 import { withSupabase } from '@/backend/middleware/supabase';
 import { withAuth } from '@/backend/middleware/auth';
 import { registerExampleRoutes } from '@/features/example/backend/route';
-import profileRoute from '@/features/profile/backend/route';
-import campaignRoute from '@/features/campaign/backend/route';
-import applicationRoute from '@/features/application/backend/route';
+import { registerProfileRoutes } from '@/features/profile/backend/route';
+import { registerCampaignRoutes } from '@/features/campaign/backend/route';
+import { registerApplicationRoutes } from '@/features/application/backend/route';
 import type { AppEnv } from '@/backend/hono/context';
 
 let singletonApp: Hono<AppEnv> | null = null;
@@ -30,10 +30,10 @@ export const createHonoApp = () => {
 
   registerExampleRoutes(app);
   
-  // API 라우트 등록 (Next.js가 /api/*로 전달하므로 /api prefix 포함)
-  app.route('/api/profile', profileRoute);
-  app.route('/api/campaigns', campaignRoute);
-  app.route('/api/applications', applicationRoute);
+  // API 라우트 등록 - basePath를 사용한 직접 등록 방식
+  registerProfileRoutes(app.basePath('/api/profile'));
+  registerCampaignRoutes(app.basePath('/api/campaigns'));
+  registerApplicationRoutes(app.basePath('/api/applications'));
 
   singletonApp = app;
 

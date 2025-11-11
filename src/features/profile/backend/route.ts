@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import type { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import type { AppEnv } from "@/backend/hono/context";
 import { ProfileService } from "./service";
@@ -9,10 +9,9 @@ import {
 } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const profileRoute: Hono<AppEnv> = new Hono<AppEnv>();
-
-// 공통 프로필 생성
-profileRoute.post(
+export const registerProfileRoutes = (app: Hono<AppEnv>) => {
+  // 공통 프로필 생성
+  app.post(
   "/",
   zValidator("json", createProfileSchema),
   async (c) => {
@@ -35,7 +34,7 @@ profileRoute.post(
 );
 
 // 프로필 조회
-profileRoute.get("/", async (c) => {
+app.get("/", async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -54,7 +53,7 @@ profileRoute.get("/", async (c) => {
 });
 
 // 인플루언서 프로필 생성
-profileRoute.post(
+app.post(
   "/influencer",
   zValidator("json", createInfluencerProfileSchema),
   async (c) => {
@@ -77,7 +76,7 @@ profileRoute.post(
 );
 
 // 광고주 프로필 생성
-profileRoute.post(
+app.post(
   "/advertiser",
   zValidator("json", createAdvertiserProfileSchema),
   async (c) => {
@@ -98,5 +97,4 @@ profileRoute.post(
     }
   }
 );
-
-export default profileRoute;
+};
