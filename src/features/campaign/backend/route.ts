@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { AppEnv } from "@/backend/hono/context";
+import type { AppEnv } from "@/backend/hono/context";
 import { CampaignService } from "./service";
 import { createCampaignSchema, updateCampaignStatusSchema } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const campaignRoute = new Hono<AppEnv>();
+const campaignRoute: Hono<AppEnv> = new Hono<AppEnv>();
 
 // 모집 중인 캠페인 목록
 campaignRoute.get("/", async (c) => {

@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { AppEnv } from "@/backend/hono/context";
+import type { AppEnv } from "@/backend/hono/context";
 import { ProfileService } from "./service";
 import {
   createProfileSchema,
@@ -9,7 +9,7 @@ import {
 } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const profileRoute = new Hono<AppEnv>();
+const profileRoute: Hono<AppEnv> = new Hono<AppEnv>();
 
 // 공통 프로필 생성
 profileRoute.post(

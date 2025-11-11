@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { AppEnv } from "@/backend/hono/context";
+import type { AppEnv } from "@/backend/hono/context";
 import { ApplicationService } from "./service";
 import { createApplicationSchema, bulkUpdateApplicationsSchema } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const applicationRoute = new Hono<AppEnv>();
+const applicationRoute: Hono<AppEnv> = new Hono<AppEnv>();
 
 // 지원하기
 applicationRoute.post(
