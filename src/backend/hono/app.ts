@@ -31,9 +31,9 @@ export const createHonoApp = () => {
   registerExampleRoutes(app);
   
   // API 라우트 등록 (Next.js가 /api/*로 전달하므로 /api prefix 포함)
-  app.route('/api/profile', profileRoute);
-  app.route('/api/campaigns', campaignRoute);
-  app.route('/api/applications', applicationRoute);
+  app.route('/api/profile', profileRoute as any);
+  app.route('/api/campaigns', campaignRoute as any);
+  app.route('/api/applications', applicationRoute as any);
 
   singletonApp = app;
 
