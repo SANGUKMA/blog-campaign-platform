@@ -1,13 +1,14 @@
-import type { Hono } from "hono";
+import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import type { AppEnv } from "@/backend/hono/context";
 import { CampaignService } from "./service";
 import { createCampaignSchema, updateCampaignStatusSchema } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-export const registerCampaignRoutes = (app: Hono<AppEnv>) => {
-  // 모집 중인 캠페인 목록
-  app.get("/", async (c) => {
+const campaignRoute = new Hono<AppEnv>();
+
+// 모집 중인 캠페인 목록
+campaignRoute.get("/", async (c) => {
   try {
     const service = new CampaignService(c.get("supabase"));
     const data = await service.getRecruitingCampaigns();
@@ -19,7 +20,7 @@ export const registerCampaignRoutes = (app: Hono<AppEnv>) => {
 });
 
 // 캠페인 생성
-app.post("/", zValidator("json", createCampaignSchema), async (c) => {
+campaignRoute.post("/", zValidator("json", createCampaignSchema), async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -38,7 +39,7 @@ app.post("/", zValidator("json", createCampaignSchema), async (c) => {
 });
 
 // 광고주의 캠페인 목록
-app.get("/my", async (c) => {
+campaignRoute.get("/my", async (c) => {
   try {
     const userId = c.get("userId");
     if (!userId) {
@@ -55,7 +56,7 @@ app.get("/my", async (c) => {
 });
 
 // 캠페인 상세 조회
-app.get("/:id", async (c) => {
+campaignRoute.get("/:id", async (c) => {
   try {
     const campaignId = c.req.param("id");
     const service = new CampaignService(c.get("supabase"));
@@ -68,7 +69,7 @@ app.get("/:id", async (c) => {
 });
 
 // 캠페인 상태 변경
-app.patch(
+campaignRoute.patch(
   "/:id/status",
   zValidator("json", updateCampaignStatusSchema),
   async (c) => {
@@ -90,4 +91,5 @@ app.patch(
     }
   }
 );
-};
+
+export default campaignRoute;
