@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { AppContext } from "@/backend/hono/context";
+import { AppEnv } from "@/backend/hono/context";
 import { ApplicationService } from "./service";
 import { createApplicationSchema, bulkUpdateApplicationsSchema } from "./schema";
 import { success, failure, respond } from "@/backend/http/response";
 
-const application = new Hono<AppContext>();
+const application = new Hono<AppEnv>();
 
 // 지원하기
 application.post(
